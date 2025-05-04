@@ -22,8 +22,8 @@ public class GlobeExceptionHandler {
     public ResponseEntity<ErrorResponse> handlePasswordNotMatchException(PasswordNotMatchException e, WebRequest request) {
         var errorResponse = new ErrorResponse();
         errorResponse.setMessage(e.getMessage());
-        errorResponse.setCode(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+        errorResponse.setCode(String.valueOf(HttpStatus.UNAUTHORIZED.value()));
         errorResponse.setPath(request.getDescription(false));
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 }

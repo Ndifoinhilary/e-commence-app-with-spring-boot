@@ -1,4 +1,6 @@
 package com.bydefault.store.controller;
+
+import com.bydefault.store.dtos.PasswordUpdateDto;
 import com.bydefault.store.dtos.UserDto;
 import com.bydefault.store.dtos.UserUpdateDto;
 import com.bydefault.store.services.UserService;
@@ -30,7 +32,7 @@ public class UserController {
     }
 
     @GetMapping("{id}/")
-    public ResponseEntity<UserDto>getUserById(@PathVariable("id") Long id) {
+    public ResponseEntity<UserDto> getUserById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(userService.findById(id));
     }
 
@@ -43,5 +45,11 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
         userService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @PostMapping("{id}/change-password/")
+    public ResponseEntity<String> changePassword(@PathVariable("id") Long id, @RequestBody PasswordUpdateDto password) {
+        return ResponseEntity.ok(userService.changePassword(password, id));
     }
 }
