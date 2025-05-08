@@ -48,6 +48,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto create(UserDto userDto) {
+        var email = userDto.getEmail();
+        if(userRepository.existsByEmail(email)){
+            throw new RuntimeException("User with email " + email + " already exists");
+        }
         var user = userMapper.toEntity(userDto);
         return userMapper.toDto(userRepository.save(user));
     }
