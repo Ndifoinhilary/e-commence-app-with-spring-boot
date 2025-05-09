@@ -71,6 +71,17 @@ public class CartServicesImpl implements CartService {
         return cartMapper.toDto(cartItem);
     }
 
+    @Override
+    public void removeItemFromCart(UUID cartId, Long productId) {
+        var cart = getCarts(cartId);
+        var cartItem = cart.getItems().stream().filter(item -> item.getProduct().getId().equals(productId)).findFirst().orElseThrow(() -> new RuntimeException("Product not in cart"));
+        cart.getItems().remove(cartItem);
+        cartItem.setCart(null);
+        cartRepository.save(cart);
+
+
+    }
+
     private Carts getCarts(UUID cartId) {
         return cartRepository.getCartWithItems(cartId).orElseThrow(() -> new ResourceNotFoundException("No cart with the given id found"));
 
