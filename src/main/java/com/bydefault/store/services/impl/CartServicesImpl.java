@@ -41,7 +41,7 @@ public class CartServicesImpl implements CartService {
     public CartItemDto addItemToCart(UUID cartId, AddItemToCartRequest request) {
         var cart = cartRepository.findById(cartId).orElseThrow(() -> new ResourceNotFoundException("No cart with the given id found"));
         var product = productRepository.findById(request.getProductId()).orElseThrow(() -> new RuntimeException("No product with the given id found"));
-        var cartItem = cart.getCartItems().stream().filter(item -> item.getProduct().getId().equals(product.getId())).findFirst().orElse(null);
+        var cartItem = cart.getItems().stream().filter(item -> item.getProduct().getId().equals(product.getId())).findFirst().orElse(null);
         if (cartItem != null) {
             cartItem.setQuantity(cartItem.getQuantity() + 1);
         } else {
@@ -49,9 +49,15 @@ public class CartServicesImpl implements CartService {
             cartItem.setCart(cart);
             cartItem.setQuantity(1);
             cartItem.setProduct(product);
-            cart.getCartItems().add(cartItem);
+            cart.getItems().add(cartItem);
         }
         cartRepository.save(cart);
         return cartMapper.toDto(cartItem);
+    }
+
+    @Override
+    public CartDto getCart(UUID cartId) {
+        var cart = cartRepository.findById(cartId).orElseThrow(() -> new ResourceNotFoundException("No cart with the given id found"));
+        return cartMapper.toDto(cart);
     }
 }

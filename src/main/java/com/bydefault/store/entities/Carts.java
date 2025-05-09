@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -25,6 +26,9 @@ public class Carts {
     private LocalDate created_at;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.MERGE)
-    private Set<CartItems>cartItems = new LinkedHashSet<>();
-//    testing some changes
+    private Set<CartItems> items = new LinkedHashSet<>();
+
+    public BigDecimal getTotalPrice() {
+        return items.stream().map(CartItems::getTotalPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }

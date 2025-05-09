@@ -9,4 +9,5 @@ import java.util.UUID;
 public interface CartService {
     CartDto createCart();
     CartItemDto addItemToCart(UUID cartId, AddItemToCartRequest request);
+    CartDto getCart(UUID cartId);
 }
