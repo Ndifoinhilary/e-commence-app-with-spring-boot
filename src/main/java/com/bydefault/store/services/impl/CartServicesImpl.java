@@ -3,6 +3,7 @@ package com.bydefault.store.services.impl;
 import com.bydefault.store.dtos.cart.AddItemToCartRequest;
 import com.bydefault.store.dtos.cart.CartDto;
 import com.bydefault.store.dtos.cart.CartItemDto;
+import com.bydefault.store.dtos.cart.UpdateCartItems;
 import com.bydefault.store.entities.CartItems;
 import com.bydefault.store.entities.Carts;
 import com.bydefault.store.entities.mappers.CartMapper;
@@ -39,7 +40,7 @@ public class CartServicesImpl implements CartService {
 
     @Override
     public CartItemDto addItemToCart(UUID cartId, AddItemToCartRequest request) {
-        var cart = cartRepository.getCartWithItems(cartId).orElseThrow(() -> new ResourceNotFoundException("No cart with the given id found"));
+        var cart = getCarts(cartId);
         var product = productRepository.findById(request.getProductId()).orElseThrow(() -> new RuntimeException("No product with the given id found"));
         var cartItem = cart.getItems().stream().filter(item -> item.getProduct().getId().equals(product.getId())).findFirst().orElse(null);
         if (cartItem != null) {
@@ -57,7 +58,21 @@ public class CartServicesImpl implements CartService {
 
     @Override
     public CartDto getCart(UUID cartId) {
-        var cart = cartRepository.getCartWithItems(cartId).orElseThrow(() -> new ResourceNotFoundException("No cart with the given id found"));
+        var cart = getCarts(cartId);
         return cartMapper.toDto(cart);
+    }
+
+    @Override
+    public CartItemDto updateCart(UUID cartId, Long productId, UpdateCartItems updateCartItems) {
+        var cart = getCarts(cartId);
+        var cartItem = cart.getItems().stream().filter(item -> item.getProduct().getId().equals(productId)).findFirst().orElseThrow(() -> new RuntimeException("Product not in cart"));
+        cartItem.setQuantity(updateCartItems.getQuantity());
+        cartRepository.save(cart);
+        return cartMapper.toDto(cartItem);
+    }
+
+    private Carts getCarts(UUID cartId) {
+        return cartRepository.getCartWithItems(cartId).orElseThrow(() -> new ResourceNotFoundException("No cart with the given id found"));
+
     }
 }
