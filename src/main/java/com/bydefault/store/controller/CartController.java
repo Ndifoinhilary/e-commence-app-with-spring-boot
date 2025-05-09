@@ -15,6 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping("/api/v1/cart/")
@@ -47,4 +48,15 @@ public class CartController {
         return ResponseEntity.ok(cartService.updateCart(cartId, productId, updateCartItems));
     }
 
+    @PostMapping("{cartId}/remove/{productId}/")
+    public ResponseEntity<String> removeFromCart(@PathVariable UUID cartId, @PathVariable Long productId) {
+        cartService.removeItemFromCart(cartId, productId);
+        return ResponseEntity.status(NO_CONTENT).body("Product " + productId + " removed from cart.");
+    }
+
+    @DeleteMapping("{cartId}/")
+    public ResponseEntity<String> clearCart(@PathVariable UUID cartId) {
+        cartService.clearCart(cartId);
+        return ResponseEntity.status(NO_CONTENT).body("Cart has been cleared.");
+    }
 }

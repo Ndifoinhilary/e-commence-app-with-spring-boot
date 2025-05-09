@@ -82,6 +82,12 @@ public class CartServicesImpl implements CartService {
 
     }
 
+    @Override
+    public void clearCart(UUID cartId) {
+        var cart = getCarts(cartId);
+        cart.getItems().clear();
+    }
+
     private Carts getCarts(UUID cartId) {
         return cartRepository.getCartWithItems(cartId).orElseThrow(() -> new ResourceNotFoundException("No cart with the given id found"));
 
