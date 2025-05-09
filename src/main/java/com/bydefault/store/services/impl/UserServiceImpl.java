@@ -11,6 +11,7 @@ import com.bydefault.store.repositories.UserRepository;
 import com.bydefault.store.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<UserDto> findAll(String name) {
@@ -53,6 +55,8 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("User with email " + email + " already exists");
         }
         var user = userMapper.toEntity(userDto);
+        var password = user.getPassword();
+        user.setPassword(passwordEncoder.encode(password));
         return userMapper.toDto(userRepository.save(user));
     }
 
