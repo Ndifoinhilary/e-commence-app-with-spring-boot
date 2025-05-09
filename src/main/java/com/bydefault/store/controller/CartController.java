@@ -1,9 +1,9 @@
 package com.bydefault.store.controller;
 
 
-import com.bydefault.store.dtos.AddItemToCartRequest;
-import com.bydefault.store.dtos.CartDto;
-import com.bydefault.store.dtos.CartItemDto;
+import com.bydefault.store.dtos.cart.AddItemToCartRequest;
+import com.bydefault.store.dtos.cart.CartDto;
+import com.bydefault.store.dtos.cart.CartItemDto;
 import com.bydefault.store.services.CartService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

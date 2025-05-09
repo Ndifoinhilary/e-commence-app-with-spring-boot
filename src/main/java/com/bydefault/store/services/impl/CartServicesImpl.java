@@ -1,8 +1,8 @@
 package com.bydefault.store.services.impl;
 
-import com.bydefault.store.dtos.AddItemToCartRequest;
-import com.bydefault.store.dtos.CartDto;
-import com.bydefault.store.dtos.CartItemDto;
+import com.bydefault.store.dtos.cart.AddItemToCartRequest;
+import com.bydefault.store.dtos.cart.CartDto;
+import com.bydefault.store.dtos.cart.CartItemDto;
 import com.bydefault.store.entities.CartItems;
 import com.bydefault.store.entities.Carts;
 import com.bydefault.store.entities.mappers.CartMapper;
@@ -12,7 +12,6 @@ import com.bydefault.store.repositories.ProductRepository;
 import com.bydefault.store.repositories.UserRepository;
 import com.bydefault.store.services.CartService;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 

@@ -1,8 +1,8 @@
 package com.bydefault.store.services;
 
-import com.bydefault.store.dtos.AddItemToCartRequest;
-import com.bydefault.store.dtos.CartDto;
-import com.bydefault.store.dtos.CartItemDto;
+import com.bydefault.store.dtos.cart.AddItemToCartRequest;
+import com.bydefault.store.dtos.cart.CartDto;
+import com.bydefault.store.dtos.cart.CartItemDto;
 
 import java.util.UUID;
 

@@ -1,4 +1,4 @@
-package com.bydefault.store.dtos;
+package com.bydefault.store.dtos.cart;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
