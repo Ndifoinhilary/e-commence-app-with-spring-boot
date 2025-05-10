@@ -1,5 +1,6 @@
 package com.bydefault.store.services.impl;
 
+import com.bydefault.store.config.JwtConfig;
 import com.bydefault.store.config.JwtServices;
 import com.bydefault.store.dtos.user.*;
 import com.bydefault.store.entities.User;
@@ -8,7 +9,10 @@ import com.bydefault.store.exceptions.PasswordNotMatchException;
 import com.bydefault.store.exceptions.ResourceNotFoundException;
 import com.bydefault.store.repositories.UserRepository;
 import com.bydefault.store.services.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,12 +25,14 @@ import java.util.Set;
 
 @Service
 @AllArgsConstructor
+@Log4j2
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtServices jwtServices;
+    private final JwtConfig jwtConfig;
 
     @Override
     public List<UserDto> findAll(String name) {
@@ -71,12 +77,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String changePassword(PasswordUpdateDto passwordUpdateDto, Long id) {
-        var user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
-        var userCurrentPassword = user.getPassword();
+    public String changePassword(PasswordUpdateDto passwordUpdateDto) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var userId = (Long) authentication.getPrincipal();
+        var user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with id " + userId + " not found"));
         var newPassword = passwordUpdateDto.getNewPassword();
         var confirmPassword = passwordUpdateDto.getConfirmPassword();
-        if (!passwordEncoder.matches(passwordUpdateDto.getNewPassword(), userCurrentPassword)) {
+        if (!passwordEncoder.matches(passwordUpdateDto.getNewPassword(), user.getPassword())) {
             throw new PasswordNotMatchException("You entered an incorrect password.");
         }
         if (!confirmPassword.equals(newPassword)) {
@@ -90,14 +97,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public JwtResponse login(LoginRequestDto loginRequestDto) {
+    public JwtResponse login(LoginRequestDto loginRequestDto, HttpServletResponse response) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword())
         );
         var user = userRepository.findByEmail(loginRequestDto.getEmail()).orElseThrow(() -> new ResourceNotFoundException("User " + loginRequestDto.getEmail() + " not found"));
-        var token = jwtServices.generateJwtToken(user);
+        var accessToken = jwtServices.generateAccessToken(user);
+        var refreshToken = jwtServices.generateRefreshToken(user);
+        var cookie = new Cookie("refresh_token", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/api/v1/auth/refresh/");
+        cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration()); // expires in 30 days
+        cookie.setSecure(true);
+        response.addCookie(cookie);
         var jwtToken = new JwtResponse();
-        jwtToken.setToken(token);
+        jwtToken.setToken(accessToken);
         return jwtToken;
     }
 
@@ -107,5 +121,18 @@ public class UserServiceImpl implements UserService {
         var userId = (Long) authentication.getPrincipal();
         var user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return userMapper.toDto(user);
+    }
+
+    @Override
+    public JwtResponse refreshToken(String refreshToken) {
+        if (!jwtServices.validateJwtToken(refreshToken)) {
+            throw new RuntimeException("Invalid JWT token");
+        }
+        var userId = jwtServices.getUserIdFromJwtToken(refreshToken);
+        var user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        var accessToken = jwtServices.generateRefreshToken(user);
+        var jwtToken = new JwtResponse();
+        jwtToken.setToken(accessToken);
+        return jwtToken;
     }
 }

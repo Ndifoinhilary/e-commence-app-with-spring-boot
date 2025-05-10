@@ -6,25 +6,32 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
 @Service
+@AllArgsConstructor
 public class JwtServices {
-    @Value("${spring.jwt}")
-    private String secret;
 
-    public String generateJwtToken(User user) {
-        final long tokenExpirationInSeconds = 60 * 60 * 24;
+    private JwtConfig jwtConfig;
+
+    public String generateAccessToken(User user) {
+        return generateToken(user, jwtConfig.getAccessTokenExpiration());
+    }
+    public String generateRefreshToken(User user) {
+        return generateToken(user, jwtConfig.getAccessTokenExpiration());
+    }
+
+    private String generateToken(User user, long tokenExpirationInSeconds) {
         return Jwts.builder()
                 .subject(user.getId().toString())
                 .claim("email", user.getEmail())
                 .claim("name", user.getName())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * tokenExpirationInSeconds))
-                .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .expiration(new Date(System.currentTimeMillis() + jwtConfig.getAccessTokenExpiration()))
+                .signWith(Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes()))
                 .compact();
     }
 
@@ -39,7 +46,7 @@ public class JwtServices {
 
     private Claims getClaims(String token) {
         return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .verifyWith(Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes()))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

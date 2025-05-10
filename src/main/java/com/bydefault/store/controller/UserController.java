@@ -7,6 +7,7 @@ import com.bydefault.store.dtos.user.UserUpdateDto;
 import com.bydefault.store.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,32 +19,17 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/v1/user/")
+@RequestMapping("/api/v1/users/")
 @Tag(name = "User")
 public class UserController {
     private final UserService userService;
 
-    @GetMapping()
+    @GetMapping
     @Operation(summary = "Give a list of users in the system")
     public ResponseEntity<List<UserDto>> getUsers(@RequestParam(required = false, defaultValue = "", name = "name") String name) {
 
         return ResponseEntity.ok(userService.findAll(name));
     }
-
-    @PostMapping("register/")
-    @Operation(summary = "Create or register a new user")
-    public ResponseEntity<UserDto> registerUser(@Valid @RequestBody UserDto userDto, UriComponentsBuilder uriBuilder) {
-        var user = userService.create(userDto);
-        var uri = uriBuilder.path("/api/v1/user/{id}/").buildAndExpand(user.getId()).toUri();
-        return ResponseEntity.created(uri).body(user);
-    }
-
-    @PostMapping("login/")
-    @Operation(summary = "End point to login a user and receive jwt token")
-    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequestDto loginRequestDto) {
-        return ResponseEntity.ok(userService.login(loginRequestDto));
-    }
-
     @GetMapping("me/")
     @Operation(summary = "Get the currently login user and details")
     public ResponseEntity<UserDto> currentUser() {
@@ -70,8 +56,4 @@ public class UserController {
     }
 
 
-    @PostMapping("{id}/change-password/")
-    public ResponseEntity<String> changePassword(@PathVariable("id") Long id, @RequestBody PasswordUpdateDto password) {
-        return ResponseEntity.ok(userService.changePassword(password, id));
-    }
 }
