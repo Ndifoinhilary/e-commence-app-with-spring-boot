@@ -12,6 +12,8 @@ import com.bydefault.store.repositories.UserRepository;
 import com.bydefault.store.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
     @Override
     public List<UserDto> findAll(String name) {
@@ -88,11 +91,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(LoginRequestDto loginRequestDto) {
-      String email = loginRequestDto.getEmail();
-      var user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"));
-      if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
-          throw new PasswordNotMatchException("Password not match");
-      }
+     authenticationManager.authenticate(
+             new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword())
+     );
        return "Logged in successfully";
     }
 }
