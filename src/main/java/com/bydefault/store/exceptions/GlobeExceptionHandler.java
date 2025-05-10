@@ -1,5 +1,6 @@
 package com.bydefault.store.exceptions;
 
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -63,7 +63,16 @@ public class GlobeExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse>handleBadCredentialsException(BadCredentialsException e, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException e, WebRequest request) {
+        var errorResponse = new ErrorResponse();
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setCode(String.valueOf(HttpStatus.UNAUTHORIZED.value()));
+        errorResponse.setPath(request.getDescription(false));
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ErrorResponse> handleJwtException(JwtException e, WebRequest request) {
         var errorResponse = new ErrorResponse();
         errorResponse.setMessage(e.getMessage());
         errorResponse.setCode(String.valueOf(HttpStatus.UNAUTHORIZED.value()));

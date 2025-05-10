@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +55,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto create(UserDto userDto) {
         var email = userDto.getEmail();
-        if(userRepository.existsByEmail(email)){
+        if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("User with email " + email + " already exists");
         }
         var user = userMapper.toEntity(userDto);
@@ -75,10 +76,10 @@ public class UserServiceImpl implements UserService {
         var userCurrentPassword = user.getPassword();
         var newPassword = passwordUpdateDto.getNewPassword();
         var confirmPassword = passwordUpdateDto.getConfirmPassword();
-        if(!passwordEncoder.matches(passwordUpdateDto.getNewPassword(), userCurrentPassword)){
+        if (!passwordEncoder.matches(passwordUpdateDto.getNewPassword(), userCurrentPassword)) {
             throw new PasswordNotMatchException("You entered an incorrect password.");
         }
-        if(!confirmPassword.equals(newPassword)) {
+        if (!confirmPassword.equals(newPassword)) {
             throw new PasswordNotMatchException("New password and confirm password is incorrect");
 
         }
@@ -90,12 +91,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public JwtResponse login(LoginRequestDto loginRequestDto) {
-     authenticationManager.authenticate(
-             new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword())
-     );
-     var token = jwtServices.generateJwtToken(loginRequestDto.getEmail());
-     var jwtToken = new JwtResponse();
-     jwtToken.setToken(token);
-       return jwtToken;
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword())
+        );
+        var user = userRepository.findByEmail(loginRequestDto.getEmail()).orElseThrow(() -> new ResourceNotFoundException("User " + loginRequestDto.getEmail() + " not found"));
+        var token = jwtServices.generateJwtToken(user);
+        var jwtToken = new JwtResponse();
+        jwtToken.setToken(token);
+        return jwtToken;
+    }
+
+    @Override
+    public UserDto currentUser() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var userId = (Long) authentication.getPrincipal();
+        var user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return userMapper.toDto(user);
     }
 }

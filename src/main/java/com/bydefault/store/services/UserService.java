@@ -12,6 +12,7 @@ public interface UserService {
     void delete(Long id);
     String changePassword(PasswordUpdateDto passwordUpdateDto, Long id);
     JwtResponse login(LoginRequestDto loginRequestDto);
+    UserDto currentUser();
 
 
 }

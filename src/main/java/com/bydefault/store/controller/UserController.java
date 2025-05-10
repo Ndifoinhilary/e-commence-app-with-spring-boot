@@ -39,8 +39,15 @@ public class UserController {
     }
 
     @PostMapping("login/")
-    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequestDto loginRequestDto){
+    @Operation(summary = "End point to login a user and receive jwt token")
+    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequestDto loginRequestDto) {
         return ResponseEntity.ok(userService.login(loginRequestDto));
+    }
+
+    @GetMapping("me/")
+    @Operation(summary = "Get the currently login user and details")
+    public ResponseEntity<UserDto> currentUser() {
+        return ResponseEntity.ok(userService.currentUser());
     }
 
     @GetMapping("{id}/")
