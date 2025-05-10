@@ -1,8 +1,9 @@
 package com.bydefault.store.services.impl;
 
-import com.bydefault.store.dtos.PasswordUpdateDto;
-import com.bydefault.store.dtos.UserDto;
-import com.bydefault.store.dtos.UserUpdateDto;
+import com.bydefault.store.dtos.user.LoginRequestDto;
+import com.bydefault.store.dtos.user.PasswordUpdateDto;
+import com.bydefault.store.dtos.user.UserDto;
+import com.bydefault.store.dtos.user.UserUpdateDto;
 import com.bydefault.store.entities.User;
 import com.bydefault.store.entities.mappers.UserMapper;
 import com.bydefault.store.exceptions.PasswordNotMatchException;
@@ -72,16 +73,26 @@ public class UserServiceImpl implements UserService {
         var userCurrentPassword = user.getPassword();
         var newPassword = passwordUpdateDto.getNewPassword();
         var confirmPassword = passwordUpdateDto.getConfirmPassword();
-        if (!userCurrentPassword.equals(passwordUpdateDto.getCurrentPassword())) {
-            throw new PasswordNotMatchException("Current password is incorrect");
+        if(!passwordEncoder.matches(passwordUpdateDto.getNewPassword(), userCurrentPassword)){
+            throw new PasswordNotMatchException("You entered an incorrect password.");
         }
         if(!confirmPassword.equals(newPassword)) {
             throw new PasswordNotMatchException("New password and confirm password is incorrect");
 
         }
-        user.setPassword(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
         return "Password changed successfully";
+    }
+
+    @Override
+    public String login(LoginRequestDto loginRequestDto) {
+      String email = loginRequestDto.getEmail();
+      var user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"));
+      if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
+          throw new PasswordNotMatchException("Password not match");
+      }
+       return "Logged in successfully";
     }
 }

@@ -1,6 +1,7 @@
 package com.bydefault.store.entities.mappers;
 
-import com.bydefault.store.dtos.UserDto;
+import com.bydefault.store.dtos.user.LoginRequestDto;
+import com.bydefault.store.dtos.user.UserDto;
 import com.bydefault.store.entities.User;
 import org.mapstruct.Mapper;
 
@@ -8,4 +9,5 @@ import org.mapstruct.Mapper;
 public interface UserMapper {
     UserDto toDto(User user);
     User toEntity(UserDto userDto);
+    User toEntity(LoginRequestDto loginRequestDto);
 }

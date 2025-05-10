@@ -1,8 +1,9 @@
 package com.bydefault.store.controller;
 
-import com.bydefault.store.dtos.PasswordUpdateDto;
-import com.bydefault.store.dtos.UserDto;
-import com.bydefault.store.dtos.UserUpdateDto;
+import com.bydefault.store.dtos.user.LoginRequestDto;
+import com.bydefault.store.dtos.user.PasswordUpdateDto;
+import com.bydefault.store.dtos.user.UserDto;
+import com.bydefault.store.dtos.user.UserUpdateDto;
 import com.bydefault.store.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,6 +36,11 @@ public class UserController {
         var user = userService.create(userDto);
         var uri = uriBuilder.path("/api/v1/user/{id}/").buildAndExpand(user.getId()).toUri();
         return ResponseEntity.created(uri).body(user);
+    }
+
+    @PostMapping("login/")
+    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequestDto loginRequestDto){
+        return ResponseEntity.ok(userService.login(loginRequestDto));
     }
 
     @GetMapping("{id}/")

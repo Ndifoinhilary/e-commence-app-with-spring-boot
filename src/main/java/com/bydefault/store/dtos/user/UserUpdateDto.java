@@ -1,4 +1,4 @@
-package com.bydefault.store.dtos;
+package com.bydefault.store.dtos.user;
 
 import lombok.Data;
 
