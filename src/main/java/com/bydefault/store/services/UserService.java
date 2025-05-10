@@ -1,9 +1,6 @@
 package com.bydefault.store.services;
 
-import com.bydefault.store.dtos.user.LoginRequestDto;
-import com.bydefault.store.dtos.user.PasswordUpdateDto;
-import com.bydefault.store.dtos.user.UserDto;
-import com.bydefault.store.dtos.user.UserUpdateDto;
+import com.bydefault.store.dtos.user.*;
 
 import java.util.List;
 
@@ -14,7 +11,7 @@ public interface UserService {
     UserDto create(UserDto userDto);
     void delete(Long id);
     String changePassword(PasswordUpdateDto passwordUpdateDto, Long id);
-    String login(LoginRequestDto loginRequestDto);
+    JwtResponse login(LoginRequestDto loginRequestDto);
 
 
 }

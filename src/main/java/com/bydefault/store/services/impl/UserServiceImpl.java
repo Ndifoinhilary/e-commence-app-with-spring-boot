@@ -1,9 +1,7 @@
 package com.bydefault.store.services.impl;
 
-import com.bydefault.store.dtos.user.LoginRequestDto;
-import com.bydefault.store.dtos.user.PasswordUpdateDto;
-import com.bydefault.store.dtos.user.UserDto;
-import com.bydefault.store.dtos.user.UserUpdateDto;
+import com.bydefault.store.config.JwtServices;
+import com.bydefault.store.dtos.user.*;
 import com.bydefault.store.entities.User;
 import com.bydefault.store.entities.mappers.UserMapper;
 import com.bydefault.store.exceptions.PasswordNotMatchException;
@@ -27,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final JwtServices jwtServices;
 
     @Override
     public List<UserDto> findAll(String name) {
@@ -90,10 +89,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String login(LoginRequestDto loginRequestDto) {
+    public JwtResponse login(LoginRequestDto loginRequestDto) {
      authenticationManager.authenticate(
              new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword())
      );
-       return "Logged in successfully";
+     var token = jwtServices.generateJwtToken(loginRequestDto.getEmail());
+     var jwtToken = new JwtResponse();
+     jwtToken.setToken(token);
+       return jwtToken;
     }
 }
