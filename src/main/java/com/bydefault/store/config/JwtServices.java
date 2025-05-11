@@ -1,6 +1,7 @@
 package com.bydefault.store.config;
 
 
+import com.bydefault.store.entities.Role;
 import com.bydefault.store.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -29,6 +30,7 @@ public class JwtServices {
                 .subject(user.getId().toString())
                 .claim("email", user.getEmail())
                 .claim("name", user.getName())
+                .claim("role", user.getRole())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtConfig.getAccessTokenExpiration()))
                 .signWith(Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes()))
@@ -54,5 +56,9 @@ public class JwtServices {
 
     public Long getUserIdFromJwtToken(String token) {
         return Long.valueOf(getClaims(token).getSubject()) ;
+    }
+
+    public Role getUserRoleFromJwtToken(String token) {
+        return Role.valueOf(getClaims(token).get("role", String.class));
     }
 }

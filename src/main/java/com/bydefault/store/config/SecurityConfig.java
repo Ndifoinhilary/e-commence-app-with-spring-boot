@@ -53,7 +53,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests.requestMatchers("/api/v1/auth/**").permitAll().anyRequest().authenticated())
                 .addFilterBefore(jwtFilters, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(c -> c.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
+                .exceptionHandling(c -> {
+                    c.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+                    c.accessDeniedHandler((request, response, accessDeniedException) -> {
+                        response.sendError(HttpStatus.FORBIDDEN.value(), accessDeniedException.getMessage());
+                    });
+                });
         return http.build();
     }
 }

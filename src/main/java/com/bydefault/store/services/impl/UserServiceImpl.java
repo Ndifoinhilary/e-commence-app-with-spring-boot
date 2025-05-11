@@ -3,6 +3,7 @@ package com.bydefault.store.services.impl;
 import com.bydefault.store.config.JwtConfig;
 import com.bydefault.store.config.JwtServices;
 import com.bydefault.store.dtos.user.*;
+import com.bydefault.store.entities.Role;
 import com.bydefault.store.entities.User;
 import com.bydefault.store.entities.mappers.UserMapper;
 import com.bydefault.store.exceptions.PasswordNotMatchException;
@@ -67,6 +68,7 @@ public class UserServiceImpl implements UserService {
         var user = userMapper.toEntity(userDto);
         var password = user.getPassword();
         user.setPassword(passwordEncoder.encode(password));
+        user.setRole(Role.USER);
         return userMapper.toDto(userRepository.save(user));
     }
 
