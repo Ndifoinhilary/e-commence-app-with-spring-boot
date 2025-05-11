@@ -24,14 +24,11 @@ import org.springframework.stereotype.Service;
 public class CheckoutServicesImpl implements CheckoutServices {
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
-    private final UserRepository userRepository;
     private final CartService cartService;
+    private final CommonServiceImpl commonService;
 
 
-    public User getCurrentUser() {
-        var userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userRepository.findById(userId).orElse(null);
-    }
+
 
     @Override
     public CheckoutResponseDto checkout(CheckoutRequestDto checkoutRequestDto) {
@@ -40,7 +37,7 @@ public class CheckoutServicesImpl implements CheckoutServices {
             throw new RuntimeException("Cart is empty");
         }
         var order = new Order();
-        order.setCustomer(getCurrentUser());
+        order.setCustomer(commonService.getCurrentUser());
         order.setTotalPrice(cart.getTotalPrice());
         order.setStatus(OrderStatus.PENDING);
         cart.getItems().forEach(item -> {
