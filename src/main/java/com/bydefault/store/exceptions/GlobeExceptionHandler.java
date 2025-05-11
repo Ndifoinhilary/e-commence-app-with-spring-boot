@@ -90,4 +90,13 @@ public class GlobeExceptionHandler {
         errorResponse.setPath(request.getDescription(false));
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(UserNotAuthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotAuthorizedException(UserNotAuthorizedException e, WebRequest request) {
+        var errorResponse = new ErrorResponse();
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setCode(String.valueOf(HttpStatus.FORBIDDEN.value()));
+        errorResponse.setPath(request.getDescription(false));
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
 }
