@@ -1,6 +1,6 @@
 package com.bydefault.store.entities;
 
-public enum OrderStatus {
+public enum PaymentStatus {
     PAID,
     CANCELLED,
     PENDING,

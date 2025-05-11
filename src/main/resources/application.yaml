@@ -14,5 +14,6 @@ spring:
 
 stripe:
   STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+  WEBHOOK_SECRET_KEY: ${WEBHOOK_SECRET_KEY}
 # which might be the front end url or where it's hosted
 websiteUrl: "https://test.com"

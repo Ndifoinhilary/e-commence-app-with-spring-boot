@@ -2,10 +2,12 @@ package com.bydefault.store.services.impl;
 
 import com.bydefault.store.dtos.checkout.CheckoutRequestDto;
 import com.bydefault.store.dtos.checkout.CheckoutResponseDto;
+import com.bydefault.store.dtos.checkout.WebhookRequest;
 import com.bydefault.store.entities.Order;
 import com.bydefault.store.entities.OrderItem;
-import com.bydefault.store.entities.OrderStatus;
+import com.bydefault.store.entities.PaymentStatus;
 import com.bydefault.store.exceptions.PaymentGatewayException;
+import com.bydefault.store.exceptions.ResourceNotFoundException;
 import com.bydefault.store.repositories.CartRepository;
 import com.bydefault.store.repositories.OrderRepository;
 import com.bydefault.store.services.CartService;
@@ -13,7 +15,6 @@ import com.bydefault.store.services.CheckoutServices;
 import com.bydefault.store.services.PaymentGateServices;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,9 +29,6 @@ public class CheckoutServicesImpl implements CheckoutServices {
     private final CommonServiceImpl commonService;
     private final PaymentGateServices paymentGateServices;
 
-    @Value("${websiteUrl}")
-    private String websiteUrl;
-
 
     @Override
     public CheckoutResponseDto checkout(CheckoutRequestDto checkoutRequestDto) {
@@ -41,7 +39,7 @@ public class CheckoutServicesImpl implements CheckoutServices {
         var order = new Order();
         order.setCustomer(commonService.getCurrentUser());
         order.setTotalPrice(cart.getTotalPrice());
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(PaymentStatus.PENDING);
         cart.getItems().forEach(item -> {
             var orderItem = new OrderItem();
             orderItem.setProduct(item.getProduct());
@@ -65,5 +63,14 @@ public class CheckoutServicesImpl implements CheckoutServices {
             throw new PaymentGatewayException(e.getMessage());
         }
 
+    }
+
+    @Override
+    public void handleWebhookEvent(WebhookRequest request) {
+      paymentGateServices.parseWebhookRequest(request).ifPresent(webhook -> {
+          var order = orderRepository.findById(webhook.getOrderId()).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+          order.setStatus(webhook.getPaymentStatus());
+          orderRepository.save(order);
+      });
     }
 }
