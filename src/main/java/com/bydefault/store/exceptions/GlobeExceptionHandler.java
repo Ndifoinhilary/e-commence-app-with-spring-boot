@@ -99,8 +99,9 @@ public class GlobeExceptionHandler {
         errorResponse.setPath(request.getDescription(false));
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
-    @ExceptionHandler(SystemInternalError.class)
-    public ResponseEntity<ErrorResponse> handleSystemInternalError(SystemInternalError e, WebRequest request) {
+
+    @ExceptionHandler(PaymentGatewayException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentException(PaymentGatewayException e, WebRequest request) {
         var errorResponse = new ErrorResponse();
         errorResponse.setMessage(e.getMessage());
         errorResponse.setCode(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));

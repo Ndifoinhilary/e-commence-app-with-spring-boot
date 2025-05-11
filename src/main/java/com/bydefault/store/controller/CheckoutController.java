@@ -2,6 +2,7 @@ package com.bydefault.store.controller;
 
 import com.bydefault.store.dtos.checkout.CheckoutRequestDto;
 import com.bydefault.store.dtos.checkout.CheckoutResponseDto;
+import com.bydefault.store.exceptions.PaymentGatewayException;
 import com.bydefault.store.exceptions.SystemInternalError;
 import com.bydefault.store.services.CheckoutServices;
 import com.stripe.exception.StripeException;
@@ -24,13 +25,13 @@ public class CheckoutController {
 
     @PostMapping
     public ResponseEntity<CheckoutResponseDto> checkout(@Valid @RequestBody CheckoutRequestDto checkoutRequestDto) {
-     try {
-         log.info("Received checkout request for cart ID: {}", checkoutRequestDto.getCartId());
-         return ResponseEntity.ok(checkoutServices.checkout(checkoutRequestDto));
-     } catch (StripeException e) {
-         log.error("Stripe error during checkout: {}", e.getMessage(), e);
-         throw new SystemInternalError("Sorry something went wrong. Please try again later");
-     }
+        try {
+            log.info("Received checkout request for cart ID: {}", checkoutRequestDto.getCartId());
+            return ResponseEntity.ok(checkoutServices.checkout(checkoutRequestDto));
+        } catch (StripeException e) {
+            log.error("Stripe error during checkout: {}", e.getMessage(), e);
+            throw new PaymentGatewayException("Sorry something went wrong. Please try again later");
+        }
     }
 
 
